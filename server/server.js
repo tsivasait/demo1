@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(cors());
 
 // Connect to MongoDB Atlas instead of local MongoDB
-const mongoURI = 'mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/blogwebsite';
+const mongoURI = 'mongodb+srv://sivasai59749:Sivasai1@cluster0.3odmyio.mongodb.net/blogwebsite';
 mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB Connected via Atlas'))
   .catch(err => {
