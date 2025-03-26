@@ -33,8 +33,15 @@ if (process.env.NODE_ENV === 'development') {
 // Enable CORS
 app.use(cors());
 
-// Connect to MongoDB using environment variable
-mongoose.connect(process.env.MONGO_URI)
+// Connect to MongoDB - using direct connection string with encoded password
+const username = encodeURIComponent('sivasai59749');
+const password = encodeURIComponent('Sivasai1');
+const cluster = 'cluster0.3odmyio.mongodb.net';
+const dbName = 'blogwebsite';
+
+const mongoURI = `mongodb+srv://${username}:${password}@${cluster}/${dbName}?retryWrites=true&w=majority`;
+
+mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB Connected via Atlas'))
   .catch(err => {
     console.error('MongoDB Connection Error:', err.message);
