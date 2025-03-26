@@ -33,16 +33,14 @@ if (process.env.NODE_ENV === 'development') {
 // Enable CORS
 app.use(cors());
 
-// Connect to MongoDB - using explicit connection string format
-mongoose.connect('mongodb://127.0.0.1:27017/blogwebsite', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => {
-  console.error('MongoDB Connection Error:', err.message);
-  process.exit(1);
-});
+// Connect to MongoDB Atlas instead of local MongoDB
+const mongoURI = 'mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/blogwebsite';
+mongoose.connect(mongoURI)
+  .then(() => console.log('MongoDB Connected via Atlas'))
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err.message);
+    process.exit(1);
+  });
 
 // Mount routers
 app.use('/api/auth', auth);
