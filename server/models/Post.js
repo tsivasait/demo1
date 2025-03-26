@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify');
 
 const PostSchema = new mongoose.Schema({
   title: {
@@ -8,11 +7,14 @@ const PostSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Title cannot be more than 100 characters']
   },
-  slug: String,
+  slug: {
+    type: String,
+    unique: true
+  },
   excerpt: {
     type: String,
     required: [true, 'Please add an excerpt'],
-    maxlength: [200, 'Excerpt cannot be more than 200 characters']
+    maxlength: [500, 'Excerpt cannot be more than 500 characters']
   },
   content: {
     type: String,
@@ -20,30 +22,44 @@ const PostSchema = new mongoose.Schema({
   },
   coverImage: {
     type: String,
-    required: [true, 'Please add a cover image']
+    default: 'default-cover.jpg'
   },
   category: {
     type: String,
-    required: [true, 'Please select a category'],
-    enum: ['food', 'travel', 'social-media', 'news', 'international', 'facts']
+    required: [true, 'Please add a category'],
+    enum: [
+      'food',
+      'travel',
+      'technology',
+      'lifestyle',
+      'business',
+      'health',
+      'social-media',
+      'news',
+      'international',
+      'facts'
+    ]
   },
   tags: {
-    type: [String],
-    required: false
+    type: [String]
+  },
+  featured: {
+    type: Boolean,
+    default: false
   },
   author: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: true
   },
-  featured: {
-    type: Boolean,
-    default: false
-  },
-  likes: {
-    type: Number,
-    default: 0
-  },
+  likes: [
+    {
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+      }
+    }
+  ],
   views: {
     type: Number,
     default: 0
@@ -59,7 +75,10 @@ const PostSchema = new mongoose.Schema({
 
 // Create post slug from the title
 PostSchema.pre('save', function(next) {
-  this.slug = slugify(this.title, { lower: true });
+  this.slug = this.title
+    .toLowerCase()
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-');
   next();
 });
 
