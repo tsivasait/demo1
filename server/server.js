@@ -33,8 +33,8 @@ if (process.env.NODE_ENV === 'development') {
 // Enable CORS
 app.use(cors());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/blogwebsite', {
+// Connect to MongoDB - using explicit connection string format
+mongoose.connect('mongodb://127.0.0.1:27017/blogwebsite', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
