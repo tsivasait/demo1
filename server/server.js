@@ -1,38 +1,58 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const path = require('path');
 const cookieParser = require('cookie-parser');
+const errorHandler = require('./middleware/error');
 
-// Routes
-const authRoutes = require('./routes/auth');
-const postRoutes = require('./routes/posts');
-const userRoutes = require('./routes/users');
-const commentRoutes = require('./routes/comments');
-const adminRoutes = require('./routes/admin');
-
-// Load environment variables
+// Load env vars
 dotenv.config();
+
+// Route files
+const auth = require('./routes/auth');
+const posts = require('./routes/posts');
+const users = require('./routes/users');
+const comments = require('./routes/comments');
+const admin = require('./routes/admin');
 
 const app = express();
 
-// Middleware
+// Body parser
 app.use(express.json());
-app.use(cookieParser());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL 
-    : 'http://localhost:3000',
-  credentials: true
-}));
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/admin', adminRoutes);
+// Cookie parser
+app.use(cookieParser());
+
+// Dev logging middleware
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Enable CORS
+app.use(cors());
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/blogwebsite', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB Connected'))
+.catch(err => {
+  console.error('MongoDB Connection Error:', err.message);
+  process.exit(1);
+});
+
+// Mount routers
+app.use('/api/auth', auth);
+app.use('/api/posts', posts);
+app.use('/api/users', users);
+app.use('/api/comments', comments);
+app.use('/api/admin', admin);
+
+// Error handler middleware
+app.use(errorHandler);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
@@ -44,17 +64,13 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => {
-    console.error('MongoDB Connection Error:', err);
-    process.exit(1);
-  });
-
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`);
+  // Close server & exit process
+  // server.close(() => process.exit(1));
+});
